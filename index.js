@@ -4,3 +4,6 @@ function add(a, b) {
 
 const result = add(3, 4);
 console.log("The result is: ", result);
+
+
+        console.log("test");
