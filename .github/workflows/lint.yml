@@ -47,7 +47,7 @@ jobs:
         with:
           message: "Great news! The linters didn't find any issues with your code. Keep up the good work!"
           pr_number: ${{ github.event.pull_request.number }}
-      
+
       - name: Comment on failure
         if: ${{ failure() }}
         uses: thollander/actions-comment-pull-request@v2
