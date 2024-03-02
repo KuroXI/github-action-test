@@ -3,10 +3,13 @@ name: Lint
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
+
+permissions:
+  pull-requests: write
 
 jobs:
   run-linters:
@@ -35,34 +38,18 @@ jobs:
         uses: wearerequired/lint-action@v2
         with:
           eslint: true
-          prettier: true
+          continue_on_error: false
 
-  notify-on-success:
-    runs-on: ubuntu-latest
-    needs: run-linters
-    if: ${{ success() }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Comment on failure
-        uses: allthatjazzleo/actions-pull-request-add-comment@master
+      - name: Comment on success
+        if: ${{ success() }}
+        uses: thollander/actions-comment-pull-request@v2
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: "Great news! The linters didn't find any issues with your code. Keep up the good work!"
-
-  notify-on-failure:
-    runs-on: ubuntu-latest
-    needs: run-linters
-    if: ${{ failure() }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+          pr_number: ${{ github.event.pull_request.number }}
 
       - name: Comment on failure
-        uses: allthatjazzleo/actions-pull-request-add-comment@master
+        if: ${{ failure() }}
+        uses: thollander/actions-comment-pull-request@v2
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          message: "Hey there! It looks like the linters encountered some issues. To resolve them, please run the following commands in your local environment:\n\n```\npnpm lint\npnpm prettier\n```\n\nThese commands will help identify and automatically fix any code styling or formatting problems. Once you've run these commands, feel free to push your changes again. If you need further assistance, don't hesitate to ask!"
+          message: "Hey there! It looks like the linters encountered some issues. To resolve them, please run the following commands in your local environment:\n\n```\npnpm lint\n```\n\nThese commands will help identify and automatically fix formatting problems. Once you've run these commands, feel free to push your changes again. If you need further assistance, don't hesitate to ask!"
+          pr_number: ${{ github.event.pull_request.number }}
