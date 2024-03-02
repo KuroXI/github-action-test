@@ -38,7 +38,6 @@ jobs:
         uses: wearerequired/lint-action@v2
         with:
           eslint: true
-          prettier: true
           continue_on_error: false
 
       - name: Comment on success
@@ -52,5 +51,5 @@ jobs:
         if: ${{ failure() }}
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: "Hey there! It looks like the linters encountered some issues. To resolve them, please run the following commands in your local environment:\n\n```\npnpm lint\npnpm prettier\n```\n\nThese commands will help identify and automatically fix any code styling or formatting problems. Once you've run these commands, feel free to push your changes again. If you need further assistance, don't hesitate to ask!"
+          message: "Hey there! It looks like the linters encountered some issues. To resolve them, please run the following commands in your local environment:\n\n```\npnpm lint\n```\n\nThese commands will help identify and automatically fix formatting problems. Once you've run these commands, feel free to push your changes again. If you need further assistance, don't hesitate to ask!"
           pr_number: ${{ github.event.pull_request.number }}
