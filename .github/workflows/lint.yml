@@ -3,10 +3,13 @@ name: Lint
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
+
+permissions:
+  pull-requests: write
 
 jobs:
   run-linters:
@@ -36,6 +39,7 @@ jobs:
         with:
           eslint: true
           prettier: true
+          continue_on_error: false
 
   notify-on-success:
     runs-on: ubuntu-latest
@@ -46,11 +50,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Comment on failure
-        uses: allthatjazzleo/actions-pull-request-add-comment@master
-        with:
+      - name: Comment on success
+        uses: actions/github-script@v7
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          message: "Great news! The linters didn't find any issues with your code. Keep up the good work!"
+          URL: ${{ github.event.pull_request.comments_url }}
+          MESSAGE: "Great news! The linters didn't find any issues with your code. Keep up the good work!"
+        with:
+          script: |
+            curl -L \
+              -X POST \
+              $URL \
+              -H "Authorization: Bearer $GITHUB_TOKEN
+              -H "Accept: application/vnd.github+json" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "body": $MESSAGE
+              }' \
 
   notify-on-failure:
     runs-on: ubuntu-latest
@@ -62,7 +78,19 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Comment on failure
-        uses: allthatjazzleo/actions-pull-request-add-comment@master
-        with:
+        uses: actions/github-script@v7
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          message: "Hey there! It looks like the linters encountered some issues. To resolve them, please run the following commands in your local environment:\n\n```\npnpm lint\npnpm prettier\n```\n\nThese commands will help identify and automatically fix any code styling or formatting problems. Once you've run these commands, feel free to push your changes again. If you need further assistance, don't hesitate to ask!"
+          URL: ${{ github.event.pull_request.comments_url }}
+          MESSAGE: "Hey there! It looks like the linters encountered some issues. To resolve them, please run the following commands in your local environment:\n\n```\npnpm lint\npnpm prettier\n```\n\nThese commands will help identify and automatically fix any code styling or formatting problems. Once you've run these commands, feel free to push your changes again. If you need further assistance, don't hesitate to ask!"
+        with:
+          script: |
+            curl -L \
+              -X POST \
+              $URL \
+              -H "Authorization: Bearer $GITHUB_TOKEN \
+              -H "Accept: application/vnd.github+json" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "body": $MESSAGE
+              }' \
